@@ -1,0 +1,50 @@
+services:
+  camoo-ai:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./:/var/www/html:cached
+    expose:
+      - "9000"
+    ports:
+      - "8086:8086"
+
+  nginx:
+    image: nginx:stable-alpine
+    depends_on:
+      - camoo-ai
+    ports:
+      - "8383:80"
+    volumes:
+      - ./:/var/www/html:ro
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./var/coverage:/usr/share/nginx/html/coverage:ro
+
+  db:
+    image: mysql:8.0
+    ports:
+      - "3309:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: symfony
+      MYSQL_USER: symfony
+      MYSQL_PASSWORD: topSecret
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./docker/mysql/init-schema.sql:/docker-entrypoint-initdb.d/init-schema.sql:ro
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    ports:
+      - "8484:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: root  # must match your db service
+    depends_on:
+      - db
+
+
+volumes:
+  db_data:

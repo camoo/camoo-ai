@@ -1,0 +1,27 @@
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+
+  # Applies globally — any service matching this interface gets tagged
+  _instanceof:
+    App\Domain\Driven\AiModelInterface:
+      tags: ['app.intent_model']
+
+  App\:
+    resource: '../src/'
+    exclude:
+      - '../src/DependencyInjection/'
+      - '../src/Entity/'
+      - '../src/Kernel.php'
+
+  # Load your AI models folder
+  App\Infrastructure\Model\:
+    resource: '../src/Infrastructure/Model/*'
+    autowire: true
+    autoconfigure: true
+
+  # The registry that collects them
+  App\Infrastructure\Model\ModelRegistry:
+    arguments:
+      - !tagged_iterator app.intent_model

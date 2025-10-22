@@ -1,0 +1,146 @@
+deptrac:
+  # Specify the directories to analyze
+  paths:
+    - src/
+
+  # Optionally exclude specific files
+  exclude_files:
+    - '#.*[tT]est.php#' # Exclude test files
+    - '#Kernel\.php$#' # Exclude Symfony Kernel
+    - '#.*Response.php$#' # Exclude Response classes
+    - src/Entity/ # Exclude Entity classes from src/Entity
+    - src/Repository/ # Exclude Repository classes from src/Repository
+
+  # Define the layers to categorize code
+  layers:
+    ###################################### driver layers ######################################
+    - name: NativePHP
+      collectors:
+        - type: classNameRegex
+          value: "#^(?!(Locale|Imagick|ImagickException|stdClass|ArrayObject|Closure|ZipArchive|JsonSerializable|DateTime|Exception|Throwable|RuntimeException|LogicException|InvalidArgumentException|NumberFormatter|IntlDateFormatter))[a-zA-Z0-9_]+$#"
+
+    - name: VendorPsr
+      collectors:
+        - type: classNameRegex
+          value: "#^Psr\\.*#"
+
+    - name: DriverHttp
+      collectors:
+        - type: classNameRegex
+          value: "#^GuzzleHttp\\.*#"
+
+    - name: SymfonyValidator
+      collectors:
+        - type: classNameRegex
+          value: "#^Symfony\\\\Component\\\\Validator\\\\.*#"
+
+    - name: SymfonyContracts
+      collectors:
+        - type: classNameRegex
+          value: "#^Symfony\\\\Contracts\\\\.*#"
+
+    - name: SymfonyDriver
+      collectors:
+        - type: bool
+          must:
+            - type: classNameRegex
+              value: "#^Symfony\\\\.*#"
+          must_not:
+            - type: classNameRegex
+              value: "#^Symfony\\\\Component\\\\Validator\\\\.*#" # SymfonyValidator is a separate layer
+            - type: classNameRegex
+              value: "#^Symfony\\\\Contracts\\\\.*#" # SymfonyContracts is a separate layer
+
+    - name: WebmozartAssertions
+      collectors:
+        - type: classNameRegex
+          value: "#^Webmozart\\\\Assert\\\\.*#"
+
+    - name: ORM_DRIVER
+      collectors:
+        - type: classNameRegex
+          value: "#^Doctrine\\\\ORM\\\\.*#"
+
+    - name: Repositories
+      collectors:
+        - type: classNameRegex
+          value: "#^App\\\\Repository\\\\.*#"
+
+    - name: Entities
+      collectors:
+        - type: classNameRegex
+          value: "#^App\\\\Entity\\\\.*#"
+
+    ############################################################# end driver layers #############################################################
+    - name: Domain
+      collectors:
+        - type: directory
+          value: /.*/Domain/.*
+
+    - name: Application
+      collectors:
+        - type: directory
+          value: /.*/Application/.*
+
+    - name: Infrastructure
+      collectors:
+        - type: directory
+          value: /.*/Infrastructure/.*
+
+  # Define the ruleset for allowed dependencies between layers
+  ruleset:
+    NativePHP:
+      - ~ # NativePHP is allowed everywhere
+
+    VendorPsr:
+      - ~ # PSR standards are allowed everywhere
+
+    Domain:
+      - NativePHP # Domain can use native PHP
+      - VendorPsr # Domain can use PSR standards (e.g., logging, interfaces)
+      - SymfonyValidator # Domain can use Symfony Validator for assertions
+      - SymfonyContracts # Domain can use Symfony Contracts for interfaces
+      - Entities # Domain can use Entity for data objects
+      - Repositories # Domain can use Repository for data access
+      - ORM_DRIVER # Domain can use Doctrine for ORM
+      - WebmozartAssertions # Domain can use Webmozart Assertions for assertions
+
+    Application:
+      - NativePHP # Application can use native PHP
+      - VendorPsr # Application can use PSR standards
+      - Domain # Application depends on Domain
+      - Infrastructure # Application depends on Infrastructure for accessing adapters and ports
+      - SymfonyDriver # Application can use Symfony components
+      - Entities # Application can use Entity for data objects
+      - Repositories # Application can use Repository for data access
+      - SymfonyContracts # Application can use Symfony Contracts for interfaces
+      - SymfonyValidator # Application can use Symfony Validator for assertions
+
+    Infrastructure:
+      - NativePHP # Infrastructure can use native PHP
+      - VendorPsr # Infrastructure can use PSR standards
+      - DriverHttp # Infrastructure can use Guzzle for HTTP requests
+      - SymfonyDriver # Infrastructure can use Symfony components
+      - Application # Infrastructure depends on Application for implementing interfaces
+      - Domain # Infrastructure can use Domain
+      - Repositories # Infrastructure can use Repository for data access
+      - Entities # Infrastructure can use Entity for data objects
+      - ORM_DRIVER # Infrastructure can use Doctrine for ORM
+      - SymfonyContracts # Infrastructure can use Symfony Contracts for interfaces
+
+  # Fix: Use correct "formatters" key
+  formatters:
+    graphviz:
+      hidden_layers:
+        - NativePHP
+        - VendorPsr
+      groups:
+        Domain:
+          label: "Domain Layer"
+        Application:
+          label: "Application Layer"
+        Infrastructure:
+          label: "Infrastructure Layer"
+      point_to_groups: true
+  skip_violations:
+

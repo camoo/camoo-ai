@@ -1,0 +1,22 @@
+{# templates/chat/test.html.twig #}
+{% block body %}
+    <div id="epinett-chat" style="height:70vh;"></div>
+
+    <script type="module">
+        import EpiNettChat from '/assets/epinett-chat.js';
+
+        const chat = new EpiNettChat({
+            endpoint: '/ai/chat',
+            mount: document.getElementById('epinett-chat'),
+            typing: (isTyping) => {
+                // add your typing indicator if you want
+                console.log('typing:', isTyping);
+            }
+        });
+
+        // optional listeners
+        chat.on('chunk', t => console.log('chunk:', t));
+        chat.on('done',  () => console.log('done'));
+        chat.on('error', e => console.error('error', e));
+    </script>
+{% endblock %}

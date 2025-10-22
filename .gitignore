@@ -1,0 +1,40 @@
+
+###> symfony/framework-bundle ###
+/.env.local
+/.env.local.php
+/.env.*.local
+/config/secrets/prod/prod.decrypt.private.php
+/public/bundles/
+/var/
+/vendor/
+###< symfony/framework-bundle ###
+
+###> phpunit/phpunit ###
+/phpunit.xml
+.phpunit.result.cache
+.phpunit.cache/
+###< phpunit/phpunit ###
+
+###> symfony/asset-mapper ###
+/public/assets/
+/assets/vendor/
+###< symfony/asset-mapper ###
+
+/.idea/
+###> friendsofphp/php-cs-fixer ###
+/.php-cs-fixer.cache
+/.deptrac.cache
+
+###< friendsofphp/php-cs-fixer ###
+
+###> deptrac/deptrac ###
+/.deptrac.cache
+###< deptrac/deptrac ###
+
+# unclassified datasets
+/datasets/unclassified/
+
+# local development files
+/.vscode/
+
+/.DS/
