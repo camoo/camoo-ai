@@ -1,4 +1,6 @@
 {
+    "name": "camoo/camoo-ai",
+    "description": "Camoo AI Platform",
     "type": "project",
     "license": "proprietary",
     "minimum-stability": "stable",
